@@ -23,6 +23,9 @@ import { priceDistributionChartTool, PRICE_DISTRIBUTION_CHART_DESCRIPTION } from
 import { getEarningsTranscript, EARNINGS_TRANSCRIPT_DESCRIPTION } from './finance/earnings-transcripts.js';
 import { socialSentimentTool, SOCIAL_SENTIMENT_DESCRIPTION } from './finance/social-sentiment.js';
 import { forecastArbitratorTool, FORECAST_ARBITRATOR_DESCRIPTION } from './finance/forecast-arbitrator.js';
+import { portfolioRiskTool, PORTFOLIO_RISK_DESCRIPTION } from './finance/portfolio-risk.js';
+import { trumpPressureIndexTool, TRUMP_PRESSURE_DESCRIPTION } from './finance/trump-pressure-index.js';
+import { polymarketTool, POLYMARKET_DESCRIPTION } from './finance/polymarket.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
 import { cronTool, CRON_TOOL_DESCRIPTION } from './cron/cron-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
@@ -138,6 +141,27 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       tool: forecastArbitratorTool,
       description: FORECAST_ARBITRATOR_DESCRIPTION,
       compactDescription: 'Meta-decision layer that reconciles divergent Markov / prediction-market / on-chain forecasts into a single call.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'portfolio_risk',
+      tool: portfolioRiskTool,
+      description: PORTFOLIO_RISK_DESCRIPTION,
+      compactDescription: 'Portfolio risk metrics: VaR, CVaR (expected shortfall), Sharpe ratio, volatility, and drawdown from a set of holdings.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'trump_pressure_index',
+      tool: trumpPressureIndexTool,
+      description: TRUMP_PRESSURE_DESCRIPTION,
+      compactDescription: 'Composite "TACO" index tracking political/market stress that may force a policy reversal.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'polymarket_search',
+      tool: polymarketTool,
+      description: POLYMARKET_DESCRIPTION,
+      compactDescription: 'Search Polymarket prediction markets for crowd-sourced probabilities on macro, geopolitical, and financial events.',
       concurrencySafe: true,
     },
     {

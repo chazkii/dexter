@@ -35,3 +35,8 @@ export { getEarningsTranscript, EARNINGS_TRANSCRIPT_DESCRIPTION } from './earnin
 export { socialSentimentTool, SOCIAL_SENTIMENT_DESCRIPTION } from './social-sentiment.js';
 export { forecastArbitratorTool, createForecastArbitratorTool, FORECAST_ARBITRATOR_DESCRIPTION } from './forecast-arbitrator.js';
 
+// Risk, macro-composite, and prediction-market tools (Tier 2 clusters)
+export { portfolioRiskTool, createPortfolioRiskTool, PORTFOLIO_RISK_DESCRIPTION } from './portfolio-risk.js';
+export { trumpPressureIndexTool, TRUMP_PRESSURE_DESCRIPTION } from './trump-pressure-index.js';
+export { polymarketTool, POLYMARKET_DESCRIPTION } from './polymarket.js';
+
