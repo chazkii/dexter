@@ -55,10 +55,15 @@ import { getIncomeStatements, getBalanceSheets, getCashFlowStatements, getAllFin
 import { getKeyRatios, getHistoricalKeyRatios } from './key-ratios.js';
 import { getFinancialSegments } from './segments.js';
 import { getEarnings } from './earnings.js';
+// Alternative data sources used as fallbacks when the primary (Financial Datasets)
+// returns FINANCIAL_DATASETS_PREMIUM_REQUIRED or lacks coverage (e.g. international tickers).
+import { getFmpIncomeStatements, getFmpBalanceSheets, getFmpCashFlowStatements } from './fmp.js';
+import { getYahooIncomeStatements } from './yahoo-finance.js';
+import { getRobinhoodFundamentals } from './robinhood.js';
 
 // All finance tools available for routing
 const FINANCE_TOOLS: StructuredToolInterface[] = [
-  // Fundamentals
+  // Fundamentals (primary: Financial Datasets)
   getIncomeStatements,
   getBalanceSheets,
   getCashFlowStatements,
@@ -70,6 +75,12 @@ const FINANCE_TOOLS: StructuredToolInterface[] = [
   getHistoricalKeyRatios,
   // Other Data
   getFinancialSegments,
+  // Fallback data sources (free + paid) — international coverage & premium-endpoint fallback
+  getFmpIncomeStatements,
+  getFmpBalanceSheets,
+  getFmpCashFlowStatements,
+  getYahooIncomeStatements,
+  getRobinhoodFundamentals,
 ];
 
 // Create a map for quick tool lookup by name
@@ -113,6 +124,14 @@ Given a user's natural language query about financial data, call the appropriate
      - Short trend (2-3 periods) → limit 3
      - Medium trend (4-5 periods) → limit 5
    - Increase limit beyond defaults only when the user explicitly asks for long history (e.g., 10-year trend)
+
+5. **Data source fallback** (free + paid providers):
+   - Default to the primary tools (get_income_statements, get_balance_sheets, get_cash_flow_statements) — they use Financial Datasets.
+   - If a primary tool returns an error containing FINANCIAL_DATASETS_PREMIUM_REQUIRED, retry the equivalent FMP tool:
+     get_fmp_income_statements / get_fmp_balance_sheets / get_fmp_cash_flow_statements.
+   - For **international / non-US tickers** (e.g. VWS.CO, AZN.L, SAP.DE), prefer the FMP tools directly — they have broader coverage.
+   - If FMP is also unavailable (no key, or FMP_PREMIUM_REQUIRED), fall back to the free sources:
+     get_yahoo_income_statements (income only) or get_robinhood_fundamentals (basic metrics: market cap, P/E, EPS).
 
 Call the appropriate tool(s) now.`;
 }

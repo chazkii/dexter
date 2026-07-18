@@ -1,11 +1,74 @@
+import { z } from 'zod';
 import { readCache, writeCache, describeRequest } from '../../utils/cache.js';
 import { logger } from '../../utils/logger.js';
+import { withRetry, isRateLimitError } from '../../utils/retry.js';
 
 const BASE_URL = 'https://api.financialdatasets.ai';
+
+/**
+ * Marker embedded in the thrown error when Financial Datasets returns HTTP 402
+ * (the endpoint requires a paid plan). Downstream callers — notably the
+ * get_financials router and the FMP/Yahoo fallback tools — check for this
+ * string to decide whether to retry against an alternative data source.
+ */
+export const FINANCIAL_DATASETS_PREMIUM = 'FINANCIAL_DATASETS_PREMIUM_REQUIRED';
+
+/** How long a single Financial Datasets request may run before aborting. */
+const REQUEST_TIMEOUT_MS = 30_000;
 
 export interface ApiResponse {
   data: Record<string, unknown>;
   url: string;
+}
+
+const FinancialDatasetsPriceSchema = z.object({
+  close: z.number(),
+}).passthrough();
+
+const FinancialDatasetsPricesPayloadSchema = z.union([
+  z.array(FinancialDatasetsPriceSchema),
+  z.object({
+    prices: z.array(FinancialDatasetsPriceSchema),
+  }).passthrough(),
+]);
+
+export type FinancialDatasetsPrice = z.infer<typeof FinancialDatasetsPriceSchema>;
+
+export class FinancialDatasetsPayloadValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FinancialDatasetsPayloadValidationError';
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export class FinancialDatasetsHttpError extends Error {
+  readonly status: number;
+  readonly statusText: string;
+  readonly body?: string;
+
+  constructor(status: number, statusText: string, body?: string) {
+    const detail = `${status} ${statusText}`;
+    const bodyDetail = body?.trim()
+      ? ` — ${body.trim().replace(/\s+/g, ' ').slice(0, 500)}`
+      : '';
+    super(`[Financial Datasets API] request failed: ${detail}${bodyDetail}`);
+    this.name = 'FinancialDatasetsHttpError';
+    this.status = status;
+    this.statusText = statusText;
+    this.body = body;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export function parseFinancialDatasetsPricesPayload(data: unknown): FinancialDatasetsPrice[] {
+  const parsed = FinancialDatasetsPricesPayloadSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new FinancialDatasetsPayloadValidationError(
+      `Malformed Financial Datasets prices payload: ${parsed.error.issues.map((issue) => issue.message).join('; ')}`,
+    );
+  }
+  return Array.isArray(parsed.data) ? parsed.data : parsed.data.prices;
 }
 
 /**
@@ -45,7 +108,11 @@ function getApiKey(): string {
 }
 
 /**
- * Shared request execution: handles API key, error handling, logging, and response parsing.
+ * Shared request execution: handles API key, retry/backoff on 429, a 30s
+ * timeout, error handling, logging, and response parsing.
+ *
+ * On HTTP 402 the request throws an error tagged with FINANCIAL_DATASETS_PREMIUM
+ * so callers can fall back to a free data source (FMP / Yahoo) instead.
  */
 async function executeRequest(
   url: string,
@@ -60,14 +127,33 @@ async function executeRequest(
 
   let response: Response;
   try {
-    response = await fetch(url, {
-      ...init,
-      headers: {
-        'x-api-key': apiKey,
-        ...init.headers,
+    response = await withRetry(
+      async () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        try {
+          const res = await fetch(url, {
+            ...init,
+            headers: {
+              'x-api-key': apiKey,
+              ...init.headers,
+            },
+            signal: controller.signal,
+          });
+          // Throw so withRetry can catch and back off on 429.
+          if (res.status === 429) throw new Error('429 rate limit');
+          return res;
+        } finally {
+          clearTimeout(timeout);
+        }
       },
-    });
+      { maxAttempts: 4, shouldRetry: isRateLimitError },
+    );
   } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      logger.error(`[Financial Datasets API] timeout: ${label}`);
+      throw new Error(`[Financial Datasets API] request timed out after 30s: ${label}`);
+    }
     const message = error instanceof Error ? error.message : String(error);
     logger.error(`[Financial Datasets API] network error: ${label} — ${message}`);
     throw new Error(`[Financial Datasets API] request failed for ${label}: ${message}`);
@@ -75,8 +161,17 @@ async function executeRequest(
 
   if (!response.ok) {
     const detail = `${response.status} ${response.statusText}`;
-    logger.error(`[Financial Datasets API] error: ${label} — ${detail}`);
-    throw new Error(`[Financial Datasets API] request failed: ${detail}`);
+    const body = typeof response.text === 'function'
+      ? await response.text().catch(() => '')
+      : '';
+    logger.error(`[Financial Datasets API] error: ${label} — ${detail}${body ? ` — ${body}` : ''}`);
+    if (response.status === 402) {
+      throw new Error(
+        `${FINANCIAL_DATASETS_PREMIUM}: This endpoint requires a paid Financial Datasets plan. ` +
+          'Upgrade at https://financialdatasets.ai or use a free data source (FMP / Yahoo) as a fallback.',
+      );
+    }
+    throw new FinancialDatasetsHttpError(response.status, response.statusText, body);
   }
 
   const data = await response.json().catch(() => {

@@ -5,6 +5,39 @@ import { getProviderById } from '@/providers';
 // Load .env on module import
 config({ quiet: true });
 
+// ---------------------------------------------------------------------------
+// Typed environment accessors
+//
+// Used by the finance data-source clients (Financial Datasets, FMP, FRED, …)
+// to read API keys and feature flags without touching process.env directly.
+// ---------------------------------------------------------------------------
+
+export function getEnv(name: string): string | undefined {
+  return process.env[name];
+}
+
+export function hasEnv(name: string): boolean {
+  const value = getEnv(name);
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+export function getBooleanEnv(name: string): boolean {
+  return /^(1|true|yes|on)$/i.test(getEnv(name) ?? '');
+}
+
+export function getNumberEnv(name: string): number | undefined {
+  const raw = getEnv(name);
+  if (raw === undefined || raw === '') {
+    return undefined;
+  }
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function getEnvOrDefault(name: string, fallback: string): string {
+  return getEnv(name) ?? fallback;
+}
+
 export function getApiKeyNameForProvider(providerId: string): string | undefined {
   return getProviderById(providerId)?.apiKeyEnvVar;
 }

@@ -14,3 +14,16 @@ export { createGetMarketData } from './get-market-data.js';
 export { createReadFilings } from './read-filings.js';
 export { createScreenStocks } from './screen-stocks.js';
 
+// Alternative data sources (free + paid)
+export { getFmpIncomeStatements, getFmpBalanceSheets, getFmpCashFlowStatements, fmpApi } from './fmp.js';
+export {
+  getYahooAnalystTargets,
+  getYahooAnalystRecommendations,
+  getYahooUpgradeDowngradeHistory,
+  getYahooIncomeStatements,
+} from './yahoo-finance.js';
+export { getRobinhoodQuote, getRobinhoodFundamentals } from './robinhood.js';
+export { getOnchainCrypto, ONCHAIN_CRYPTO_DESCRIPTION } from './onchain-crypto.js';
+export { getFixedIncomeTool, FIXED_INCOME_DESCRIPTION } from './fixed-income.js';
+export { waccInputsTool, WACC_INPUTS_DESCRIPTION } from './wacc-inputs.js';
+

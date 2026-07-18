@@ -14,6 +14,9 @@ import { GET_FINANCIALS_DESCRIPTION } from './finance/get-financials.js';
 import { GET_MARKET_DATA_DESCRIPTION } from './finance/get-market-data.js';
 import { READ_FILINGS_DESCRIPTION } from './finance/read-filings.js';
 import { SCREEN_STOCKS_DESCRIPTION } from './finance/screen-stocks.js';
+import { getFixedIncomeTool, FIXED_INCOME_DESCRIPTION } from './finance/fixed-income.js';
+import { getOnchainCrypto, ONCHAIN_CRYPTO_DESCRIPTION } from './finance/onchain-crypto.js';
+import { waccInputsTool, WACC_INPUTS_DESCRIPTION } from './finance/wacc-inputs.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
 import { cronTool, CRON_TOOL_DESCRIPTION } from './cron/cron-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
@@ -73,6 +76,27 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       tool: createScreenStocks(model),
       description: SCREEN_STOCKS_DESCRIPTION,
       compactDescription: 'Screen stocks by financial criteria (P/E, growth, margins, etc.).',
+      concurrencySafe: true,
+    },
+    {
+      name: 'get_fixed_income',
+      tool: getFixedIncomeTool,
+      description: FIXED_INCOME_DESCRIPTION,
+      compactDescription: 'US macro & rates from FRED: Treasury yields, Fed funds, yield-curve spread, CPI, unemployment. No key required.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'get_onchain_crypto',
+      tool: getOnchainCrypto,
+      description: ONCHAIN_CRYPTO_DESCRIPTION,
+      compactDescription: 'Crypto on-chain & market intel from CoinGecko: market data, sentiment, developer/community activity, BTC dominance, whale moves. No key required.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'wacc_inputs',
+      tool: waccInputsTool,
+      description: WACC_INPUTS_DESCRIPTION,
+      compactDescription: 'Fetches CAPM inputs (beta, risk-free rate, equity premium, cost of debt) and computes WACC for a ticker.',
       concurrencySafe: true,
     },
     {
