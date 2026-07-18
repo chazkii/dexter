@@ -102,7 +102,7 @@ const MODEL_FACTORIES: Record<string, ModelFactory> = {
       ...opts,
       apiKey: getApiKey('MOONSHOT_API_KEY'),
       configuration: {
-        baseURL: 'https://api.moonshot.cn/v1',
+        baseURL: 'https://api.moonshot.ai/v1',
       },
     }),
   deepseek: (name, opts) => {

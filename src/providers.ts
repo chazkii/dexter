@@ -56,7 +56,7 @@ export const PROVIDERS: ProviderDef[] = [
     displayName: 'Moonshot',
     modelPrefix: 'kimi-',
     apiKeyEnvVar: 'MOONSHOT_API_KEY',
-    fastModel: 'kimi-k2-5',
+    fastModel: 'kimi-k2.7-code-highspeed',
     contextWindow: 131_072,
   },
   {
