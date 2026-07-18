@@ -17,6 +17,12 @@ import { SCREEN_STOCKS_DESCRIPTION } from './finance/screen-stocks.js';
 import { getFixedIncomeTool, FIXED_INCOME_DESCRIPTION } from './finance/fixed-income.js';
 import { getOnchainCrypto, ONCHAIN_CRYPTO_DESCRIPTION } from './finance/onchain-crypto.js';
 import { waccInputsTool, WACC_INPUTS_DESCRIPTION } from './finance/wacc-inputs.js';
+import { getOptionsChainTool, OPTIONS_CHAIN_DESCRIPTION } from './finance/options.js';
+import { bitmexMarketTool, BITMEX_MARKET_DESCRIPTION } from './finance/bitmex.js';
+import { priceDistributionChartTool, PRICE_DISTRIBUTION_CHART_DESCRIPTION } from './finance/price-distribution-chart.js';
+import { getEarningsTranscript, EARNINGS_TRANSCRIPT_DESCRIPTION } from './finance/earnings-transcripts.js';
+import { socialSentimentTool, SOCIAL_SENTIMENT_DESCRIPTION } from './finance/social-sentiment.js';
+import { forecastArbitratorTool, FORECAST_ARBITRATOR_DESCRIPTION } from './finance/forecast-arbitrator.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
 import { cronTool, CRON_TOOL_DESCRIPTION } from './cron/cron-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
@@ -97,6 +103,41 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       tool: waccInputsTool,
       description: WACC_INPUTS_DESCRIPTION,
       compactDescription: 'Fetches CAPM inputs (beta, risk-free rate, equity premium, cost of debt) and computes WACC for a ticker.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'get_options_chain',
+      tool: getOptionsChainTool,
+      description: OPTIONS_CHAIN_DESCRIPTION,
+      compactDescription: 'Options chain: strikes, IV, open interest, Greeks, put/call ratio, and unusual-volume flags. No key required.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'get_earnings_transcript',
+      tool: getEarningsTranscript,
+      description: EARNINGS_TRANSCRIPT_DESCRIPTION,
+      compactDescription: 'Earnings-call transcripts from SEC EDGAR 8-Ks: prepared remarks, forward guidance, and Q&A highlights.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'bitmex_market',
+      tool: bitmexMarketTool,
+      description: BITMEX_MARKET_DESCRIPTION,
+      compactDescription: 'Active BitMEX derivatives instruments plus optional daily historical closes. No key required.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'price_distribution_chart',
+      tool: priceDistributionChartTool,
+      description: PRICE_DISTRIBUTION_CHART_DESCRIPTION,
+      compactDescription: 'Renders a terminal ASCII bar chart of an implied price probability distribution.',
+      concurrencySafe: true,
+    },
+    {
+      name: 'forecast_arbitrator',
+      tool: forecastArbitratorTool,
+      description: FORECAST_ARBITRATOR_DESCRIPTION,
+      compactDescription: 'Meta-decision layer that reconciles divergent Markov / prediction-market / on-chain forecasts into a single call.',
       concurrencySafe: true,
     },
     {
@@ -225,6 +266,13 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       tool: xSearchTool,
       description: X_SEARCH_DESCRIPTION,
       compactDescription: 'Search X/Twitter for tweets, profiles, and threads.',
+      concurrencySafe: true,
+    });
+    tools.push({
+      name: 'social_sentiment',
+      tool: socialSentimentTool,
+      description: SOCIAL_SENTIMENT_DESCRIPTION,
+      compactDescription: 'Analyze X/Twitter social-media sentiment for a stock, crypto, ETF, or market topic.',
       concurrencySafe: true,
     });
   }

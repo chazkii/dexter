@@ -27,3 +27,11 @@ export { getOnchainCrypto, ONCHAIN_CRYPTO_DESCRIPTION } from './onchain-crypto.j
 export { getFixedIncomeTool, FIXED_INCOME_DESCRIPTION } from './fixed-income.js';
 export { waccInputsTool, WACC_INPUTS_DESCRIPTION } from './wacc-inputs.js';
 
+// Standalone analysis tools (options, transcripts, derivatives, sentiment, charts, forecasting)
+export { getOptionsChainTool, OPTIONS_CHAIN_DESCRIPTION } from './options.js';
+export { bitmexMarketTool, BITMEX_MARKET_DESCRIPTION } from './bitmex.js';
+export { priceDistributionChartTool, PRICE_DISTRIBUTION_CHART_DESCRIPTION } from './price-distribution-chart.js';
+export { getEarningsTranscript, EARNINGS_TRANSCRIPT_DESCRIPTION } from './earnings-transcripts.js';
+export { socialSentimentTool, SOCIAL_SENTIMENT_DESCRIPTION } from './social-sentiment.js';
+export { forecastArbitratorTool, createForecastArbitratorTool, FORECAST_ARBITRATOR_DESCRIPTION } from './forecast-arbitrator.js';
+
