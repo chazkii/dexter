@@ -22,7 +22,7 @@ import { bitmexMarketTool, BITMEX_MARKET_DESCRIPTION } from './finance/bitmex.js
 import { priceDistributionChartTool, PRICE_DISTRIBUTION_CHART_DESCRIPTION } from './finance/price-distribution-chart.js';
 import { getEarningsTranscript, EARNINGS_TRANSCRIPT_DESCRIPTION } from './finance/earnings-transcripts.js';
 import { socialSentimentTool, SOCIAL_SENTIMENT_DESCRIPTION } from './finance/social-sentiment.js';
-import { forecastArbitratorTool, FORECAST_ARBITRATOR_DESCRIPTION } from './finance/forecast-arbitrator.js';
+// forecast_arbitrator is not registered — see note at its former registry entry below.
 import { portfolioRiskTool, PORTFOLIO_RISK_DESCRIPTION } from './finance/portfolio-risk.js';
 import { trumpPressureIndexTool, TRUMP_PRESSURE_DESCRIPTION } from './finance/trump-pressure-index.js';
 import { polymarketTool, POLYMARKET_DESCRIPTION } from './finance/polymarket.js';
@@ -136,13 +136,12 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       compactDescription: 'Renders a terminal ASCII bar chart of an implied price probability distribution.',
       concurrencySafe: true,
     },
-    {
-      name: 'forecast_arbitrator',
-      tool: forecastArbitratorTool,
-      description: FORECAST_ARBITRATOR_DESCRIPTION,
-      compactDescription: 'Meta-decision layer that reconciles divergent Markov / prediction-market / on-chain forecasts into a single call.',
-      concurrencySafe: true,
-    },
+    // NOTE: forecast_arbitrator is intentionally NOT registered. Its input schema
+    // uses z.coerce / z.preprocess, which cannot be serialized to JSON Schema when
+    // binding tools to the model ("Transforms cannot be represented in JSON Schema").
+    // It is also a meta-layer over the Tier 3 forecasting engine (markov_distribution /
+    // polymarket_forecast), which is not ported yet — so it has nothing to arbitrate.
+    // Re-enable it (with a serializable schema rewrite) alongside the Tier 3 port.
     {
       name: 'portfolio_risk',
       tool: portfolioRiskTool,
